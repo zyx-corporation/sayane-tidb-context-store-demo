@@ -23,11 +23,14 @@ def init() -> None:
 
 
 @app.command()
-def ingest(path: Path) -> None:
+def ingest(path: Path, embed: bool = False) -> None:
     """Ingest Markdown files into TiDB."""
-    results = ingest_markdown_path(path)
+    results = ingest_markdown_path(path, embed=embed)
     for result in results:
-        print(f"[green]{result.source_path}[/green]: {result.chunk_count} chunks -> {result.document_id}")
+        print(
+            f"[green]{result.source_path}[/green]: "
+            f"{result.chunk_count} chunks, {result.embedded_count} embeddings -> {result.document_id}"
+        )
 
 
 @app.command()
