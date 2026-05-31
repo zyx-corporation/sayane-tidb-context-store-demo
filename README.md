@@ -12,7 +12,8 @@ This is not the full Sayane implementation. It is a focused prototype for valida
 
 ## Specs
 
-- [`docs/specs/connection-layer-spec.md`](docs/specs/connection-layer-spec.md): backend-agnostic connection layer contract.
+- [`docs/specs/open-context-store-interface.md`](docs/specs/open-context-store-interface.md): OCSI conceptual draft.
+- [`docs/specs/connection-layer-spec.md`](docs/specs/connection-layer-spec.md): Sayane-oriented connection layer profile.
 - [`docs/specs/sayane-tidb-basic-spec.md`](docs/specs/sayane-tidb-basic-spec.md): TiDB adapter basic specification.
 
 ## Demo scenario
