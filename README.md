@@ -17,11 +17,11 @@ Development follows a lightweight RDE engineering policy for this demo. See [`do
 ## Planned CLI
 
 ```bash
-sayane-demo init
-sayane-demo ingest data/sample_docs
-sayane-demo search "Sayane local backend" --mode text
-sayane-demo search "Context Store Interface" --mode vector
-sayane-demo search "TiDB enterprise backend" --mode hybrid
-sayane-demo logs
-sayane-demo inspect <retrieval_id>
+sayane-tidb-demo init
+sayane-tidb-demo ingest data/sample_docs
+sayane-tidb-demo search "Sayane local backend" --mode text
+sayane-tidb-demo search "Context Store Interface" --mode vector
+sayane-tidb-demo search "TiDB enterprise backend" --mode hybrid
+sayane-tidb-demo logs
+sayane-tidb-demo inspect <retrieval_id>
 ```
