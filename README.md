@@ -14,6 +14,10 @@ This is not the full Sayane implementation. It is a focused prototype for valida
 
 Development follows a lightweight RDE engineering policy for this demo. See [`docs/engineering/rde-development-guidelines.md`](docs/engineering/rde-development-guidelines.md).
 
+## Article notes
+
+See [`docs/article-implementation-notes.md`](docs/article-implementation-notes.md) for the current implementation boundary and article claim scope.
+
 ## Planned CLI
 
 ```bash
