@@ -22,6 +22,12 @@ source .venv/bin/activate
 python -m pip install -e .
 ```
 
+Or use:
+
+```bash
+make install
+```
+
 ## 2. Configure environment
 
 Copy the example file and fill in local values.
@@ -53,6 +59,8 @@ EMBEDDING_DIM=1536
 
 ```bash
 sayane-tidb-demo init
+# or
+make init
 ```
 
 This command executes SQL files under `sql/`.
@@ -61,18 +69,24 @@ This command executes SQL files under `sql/`.
 
 ```bash
 sayane-tidb-demo ingest data/sample_docs
+# or
+make ingest
 ```
 
 This is enough for text search.
 
 ```bash
 sayane-tidb-demo search "TiDB" --mode text
+# or
+make search-text
 ```
 
 ## 5. Ingest with embeddings
 
 ```bash
 sayane-tidb-demo ingest data/sample_docs --embed
+# or
+make ingest-embed
 ```
 
 This requires `OPENAI_API_KEY`.
@@ -82,6 +96,9 @@ After this, vector and hybrid modes can run.
 ```bash
 sayane-tidb-demo search "Context Store Interface" --mode vector
 sayane-tidb-demo search "enterprise backend" --mode hybrid
+# or
+make search-vector
+make search-hybrid
 ```
 
 ## 6. Inspect retrieval logs
@@ -89,6 +106,8 @@ sayane-tidb-demo search "enterprise backend" --mode hybrid
 ```bash
 sayane-tidb-demo logs
 sayane-tidb-demo inspect <retrieval_id>
+# or
+make logs
 ```
 
 ## Current implementation boundary
@@ -102,11 +121,11 @@ It is not yet TiDB-native vector-indexed search. See `docs/article-implementatio
 For the Zenn article, the simplest reproducible flow is:
 
 ```bash
-sayane-tidb-demo init
-sayane-tidb-demo ingest data/sample_docs
-sayane-tidb-demo search "TiDB" --mode text
-sayane-tidb-demo ingest data/sample_docs --embed
-sayane-tidb-demo search "Context Store Interface" --mode vector
-sayane-tidb-demo search "enterprise backend" --mode hybrid
-sayane-tidb-demo logs
+make init
+make ingest
+make search-text
+make ingest-embed
+make search-vector
+make search-hybrid
+make logs
 ```
