@@ -31,3 +31,13 @@ Markdown files
   -> retrieval logs
   -> lightweight audit summary
 ```
+
+## Current vector search stance
+
+The current implementation stores embeddings as JSON in TiDB and calculates cosine similarity in Python.
+
+This is a deliberate intermediate step for the Level C article prototype. It allows the demo to compare text, vector, and hybrid retrieval before adopting TiDB native vector index syntax.
+
+A later step should replace the Python-side vector scoring with TiDB Cloud native vector search after confirming the target cluster capabilities and SQL syntax.
+
+This distinction must remain clear in the article: the current implementation is vector-enabled, but not yet TiDB-native vector-indexed.
