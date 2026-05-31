@@ -14,6 +14,10 @@ This is not the full Sayane implementation. It is a focused prototype for valida
 
 See [`docs/sayane-integration-demo-plan.md`](docs/sayane-integration-demo-plan.md) for how this repository connects to Sayane core concepts such as local-first context, candidate review, lineage, retrieval logs, and backend adapters.
 
+## Backend selection
+
+See [`docs/backend-selection-rationale.md`](docs/backend-selection-rationale.md) for why this demo evaluates TiDB Cloud instead of treating a generic vector SaaS as the default backend.
+
 ## Engineering stance
 
 Development follows a lightweight RDE engineering policy for this demo. See [`docs/engineering/rde-development-guidelines.md`](docs/engineering/rde-development-guidelines.md).
