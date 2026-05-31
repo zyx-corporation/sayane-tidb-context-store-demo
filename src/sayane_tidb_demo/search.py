@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 import json
+import math
 import uuid
 
 from sqlalchemy import text
@@ -9,6 +10,7 @@ from sqlalchemy.engine import Engine
 
 from .audit import lightweight_audit
 from .db import create_db_engine
+from .embeddings import EmbeddingProvider, create_embedding_provider
 
 
 @dataclass(frozen=True)
@@ -27,6 +29,17 @@ class RetrievalRecord:
     mode: str
     results: list[SearchResult]
     audit_summary: dict[str, object]
+
+
+def cosine_similarity(left: list[float], right: list[float]) -> float:
+    if not left or not right or len(left) != len(right):
+        return 0.0
+    dot = sum(a * b for a, b in zip(left, right, strict=True))
+    left_norm = math.sqrt(sum(a * a for a in left))
+    right_norm = math.sqrt(sum(b * b for b in right))
+    if left_norm == 0.0 or right_norm == 0.0:
+        return 0.0
+    return dot / (left_norm * right_norm)
 
 
 def search_text(query: str, engine: Engine | None = None, limit: int = 5) -> list[SearchResult]:
@@ -80,14 +93,87 @@ def search_text(query: str, engine: Engine | None = None, limit: int = 5) -> lis
     ]
 
 
+def search_vector(
+    query: str,
+    engine: Engine | None = None,
+    limit: int = 5,
+    embedding_provider: EmbeddingProvider | None = None,
+) -> list[SearchResult]:
+    resolved_engine = engine or create_db_engine()
+    provider = embedding_provider or create_embedding_provider()
+    query_embedding = provider.embed_texts([query])[0].embedding
+
+    with resolved_engine.begin() as connection:
+        rows = connection.execute(
+            text(
+                """
+                SELECT id, document_id, chunk_index, content, embedding
+                FROM chunks
+                WHERE embedding IS NOT NULL
+                """
+            )
+        ).mappings().all()
+
+    scored: list[SearchResult] = []
+    for row in rows:
+        raw_embedding = row["embedding"]
+        chunk_embedding = json.loads(raw_embedding) if isinstance(raw_embedding, str) else raw_embedding
+        score = cosine_similarity(query_embedding, chunk_embedding)
+        scored.append(
+            SearchResult(
+                chunk_id=str(row["id"]),
+                document_id=str(row["document_id"]),
+                chunk_index=int(row["chunk_index"]),
+                content=str(row["content"]),
+                score=score,
+            )
+        )
+
+    return sorted(scored, key=lambda item: item.score, reverse=True)[:limit]
+
+
+def search_hybrid(query: str, engine: Engine | None = None, limit: int = 5) -> list[SearchResult]:
+    resolved_engine = engine or create_db_engine()
+    text_results = search_text(query=query, engine=resolved_engine, limit=limit)
+    vector_results = search_vector(query=query, engine=resolved_engine, limit=limit)
+
+    merged: dict[str, SearchResult] = {}
+    for result in text_results:
+        merged[result.chunk_id] = SearchResult(
+            chunk_id=result.chunk_id,
+            document_id=result.document_id,
+            chunk_index=result.chunk_index,
+            content=result.content,
+            score=0.5 + result.score,
+        )
+    for result in vector_results:
+        existing = merged.get(result.chunk_id)
+        if existing:
+            merged[result.chunk_id] = SearchResult(
+                chunk_id=result.chunk_id,
+                document_id=result.document_id,
+                chunk_index=result.chunk_index,
+                content=result.content,
+                score=existing.score + result.score,
+            )
+        else:
+            merged[result.chunk_id] = result
+
+    return sorted(merged.values(), key=lambda item: item.score, reverse=True)[:limit]
+
+
 def run_search(query: str, mode: str = "text", engine: Engine | None = None, limit: int = 5) -> RetrievalRecord:
     if mode not in {"text", "vector", "hybrid"}:
         raise ValueError(f"unsupported search mode: {mode}")
-    if mode != "text":
-        raise NotImplementedError(f"{mode} search is not implemented yet")
 
     resolved_engine = engine or create_db_engine()
-    results = search_text(query=query, engine=resolved_engine, limit=limit)
+    if mode == "text":
+        results = search_text(query=query, engine=resolved_engine, limit=limit)
+    elif mode == "vector":
+        results = search_vector(query=query, engine=resolved_engine, limit=limit)
+    else:
+        results = search_hybrid(query=query, engine=resolved_engine, limit=limit)
+
     selected_chunks = [{"id": result.chunk_id, "content": result.content} for result in results]
     audit_summary = lightweight_audit(query, selected_chunks)
     retrieval_id = str(uuid.uuid4())
