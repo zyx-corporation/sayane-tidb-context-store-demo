@@ -18,7 +18,7 @@ dependencies = [
 ]
 
 [project.scripts]
-sayane-demo = "sayane_tidb_demo.cli:app"
+sayane-tidb-demo = "sayane_tidb_demo.cli:app"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
