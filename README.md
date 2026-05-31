@@ -19,6 +19,7 @@ Development follows a lightweight RDE engineering policy for this demo. See [`do
 ```bash
 sayane-tidb-demo init
 sayane-tidb-demo ingest data/sample_docs
+sayane-tidb-demo ingest data/sample_docs --embed
 sayane-tidb-demo search "Sayane local backend" --mode text
 sayane-tidb-demo search "Context Store Interface" --mode vector
 sayane-tidb-demo search "TiDB enterprise backend" --mode hybrid
