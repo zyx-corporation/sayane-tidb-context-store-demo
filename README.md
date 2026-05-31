@@ -10,6 +10,11 @@ Build a Sayane-linked empirical demo that demonstrates Markdown ingestion, chunk
 
 This is not the full Sayane implementation. It is a focused prototype for validating how Sayane Context Store concepts can be represented through a TiDB Cloud backend adapter.
 
+## Specs
+
+- [`docs/specs/connection-layer-spec.md`](docs/specs/connection-layer-spec.md): backend-agnostic connection layer contract.
+- [`docs/specs/sayane-tidb-basic-spec.md`](docs/specs/sayane-tidb-basic-spec.md): TiDB adapter basic specification.
+
 ## Demo scenario
 
 See [`docs/demo-scenario.md`](docs/demo-scenario.md) for the narrative scenario that connects Sayane concepts, TiDB-backed retrieval, retrieval logs, and lightweight audit summaries.
