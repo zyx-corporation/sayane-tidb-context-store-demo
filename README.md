@@ -10,6 +10,10 @@ Build a minimal Context Store that demonstrates Markdown ingestion, chunking, Ti
 
 This is not the full Sayane implementation. It is a focused prototype for validating the Sayane Context Store Interface with TiDB Cloud.
 
+## Engineering stance
+
+Development follows a lightweight RDE engineering policy for this demo. See [`docs/engineering/rde-development-guidelines.md`](docs/engineering/rde-development-guidelines.md).
+
 ## Planned CLI
 
 ```bash
