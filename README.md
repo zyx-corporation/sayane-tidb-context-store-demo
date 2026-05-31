@@ -14,6 +14,10 @@ This is not the full Sayane implementation. It is a focused prototype for valida
 
 Development follows a lightweight RDE engineering policy for this demo. See [`docs/engineering/rde-development-guidelines.md`](docs/engineering/rde-development-guidelines.md).
 
+## Runbook
+
+See [`docs/local-runbook.md`](docs/local-runbook.md) for local setup and demo execution steps.
+
 ## Article notes
 
 See [`docs/article-implementation-notes.md`](docs/article-implementation-notes.md) for the current implementation boundary and article claim scope.
