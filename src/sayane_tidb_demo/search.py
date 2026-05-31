@@ -13,6 +13,9 @@ from .db import create_db_engine
 from .embeddings import EmbeddingProvider, create_embedding_provider
 
 
+TEXT_MATCH_BONUS = 0.5
+
+
 @dataclass(frozen=True)
 class SearchResult:
     chunk_id: str
@@ -40,6 +43,35 @@ def cosine_similarity(left: list[float], right: list[float]) -> float:
     if left_norm == 0.0 or right_norm == 0.0:
         return 0.0
     return dot / (left_norm * right_norm)
+
+
+def merge_hybrid_results(
+    text_results: list[SearchResult],
+    vector_results: list[SearchResult],
+    limit: int = 5,
+) -> list[SearchResult]:
+    merged: dict[str, SearchResult] = {}
+    for result in text_results:
+        merged[result.chunk_id] = SearchResult(
+            chunk_id=result.chunk_id,
+            document_id=result.document_id,
+            chunk_index=result.chunk_index,
+            content=result.content,
+            score=TEXT_MATCH_BONUS + result.score,
+        )
+    for result in vector_results:
+        existing = merged.get(result.chunk_id)
+        if existing:
+            merged[result.chunk_id] = SearchResult(
+                chunk_id=result.chunk_id,
+                document_id=result.document_id,
+                chunk_index=result.chunk_index,
+                content=result.content,
+                score=existing.score + result.score,
+            )
+        else:
+            merged[result.chunk_id] = result
+    return sorted(merged.values(), key=lambda item: item.score, reverse=True)[:limit]
 
 
 def search_text(query: str, engine: Engine | None = None, limit: int = 5) -> list[SearchResult]:
@@ -136,30 +168,7 @@ def search_hybrid(query: str, engine: Engine | None = None, limit: int = 5) -> l
     resolved_engine = engine or create_db_engine()
     text_results = search_text(query=query, engine=resolved_engine, limit=limit)
     vector_results = search_vector(query=query, engine=resolved_engine, limit=limit)
-
-    merged: dict[str, SearchResult] = {}
-    for result in text_results:
-        merged[result.chunk_id] = SearchResult(
-            chunk_id=result.chunk_id,
-            document_id=result.document_id,
-            chunk_index=result.chunk_index,
-            content=result.content,
-            score=0.5 + result.score,
-        )
-    for result in vector_results:
-        existing = merged.get(result.chunk_id)
-        if existing:
-            merged[result.chunk_id] = SearchResult(
-                chunk_id=result.chunk_id,
-                document_id=result.document_id,
-                chunk_index=result.chunk_index,
-                content=result.content,
-                score=existing.score + result.score,
-            )
-        else:
-            merged[result.chunk_id] = result
-
-    return sorted(merged.values(), key=lambda item: item.score, reverse=True)[:limit]
+    return merge_hybrid_results(text_results=text_results, vector_results=vector_results, limit=limit)
 
 
 def run_search(query: str, mode: str = "text", engine: Engine | None = None, limit: int = 5) -> RetrievalRecord:
