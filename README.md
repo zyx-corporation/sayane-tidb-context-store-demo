@@ -22,6 +22,10 @@ See [`docs/local-runbook.md`](docs/local-runbook.md) for local setup and demo ex
 
 See [`docs/article-implementation-notes.md`](docs/article-implementation-notes.md) for the current implementation boundary and article claim scope.
 
+## Zenn draft
+
+See [`docs/zenn-article-draft.md`](docs/zenn-article-draft.md) for the initial article draft.
+
 ## Planned CLI
 
 ```bash
