@@ -12,6 +12,13 @@ This document defines OCSI as an open, backend-agnostic interface concept for st
 
 OCSI is broader than the Sayane-TiDB demo. The Sayane-TiDB demo is one implementation-oriented experiment that validates parts of this interface.
 
+## Companion specifications
+
+- `ocsi-t-rde-requirement.md`: defines T-RDE compatibility requirements for OCSI implementations.
+- `ocsi-interface-minimality-principles.md`: defines how OCSI avoids fat-interface growth.
+- `connection-layer-spec.md`: defines a Sayane-oriented application profile of OCSI.
+- `sayane-tidb-basic-spec.md`: defines a TiDB adapter profile of OCSI.
+
 ## Purpose
 
 AI workflows increasingly rely on context that moves across tools, models, editors, agents, and organizations.
@@ -115,11 +122,21 @@ Generic operations should remain stable, while backend-specific optimizations ma
 
 For example, TiDB-native vector search, pgvector, or a vector SaaS reranker can be used without rewriting the general OCSI model.
 
-### 6. RDE compatibility
+### 6. T-RDE compatibility
 
-OCSI should support meaning-change audit workflows.
+OCSI implementations should be T-RDE-compatible.
 
-It does not implement full RDE by itself, but it must preserve enough trace data for RDE-style evaluation.
+This does not mean that every retrieval must run a heavyweight evaluator synchronously. It means that the implementation must preserve enough trace data for T-RDE-style review.
+
+See `ocsi-t-rde-requirement.md`.
+
+### 7. Interface minimality
+
+OCSI core should be evidence-centered, not feature-centered.
+
+Backend-specific methods, generation, planning, approval workflows, UI behavior, and business-specific policy logic should not be added to OCSI core unless they satisfy the promotion rule.
+
+See `ocsi-interface-minimality-principles.md`.
 
 ## Conceptual model
 
@@ -233,7 +250,7 @@ drift_risk
 unresolved
 ```
 
-This is not full RDE scoring. Full RDE evaluation can consume OCSI records as input.
+This is not full T-RDE scoring. Full T-RDE evaluation can consume OCSI records as input.
 
 ### EvidenceExport
 
@@ -423,7 +440,7 @@ Captured Candidate -> SourceRecord or SearchUnit
 Approved / Rejected Lineage -> SourceRecord or metadata
 Compiled Prompt Block -> SearchUnit
 Retrieval Log -> RetrievalEvent
-Lightweight RDE Summary -> AuditSummary
+Lightweight T-RDE Summary -> AuditSummary
 ```
 
 Sayane should not become tied to one OCSI backend.
@@ -447,7 +464,7 @@ It does not yet demonstrate:
 
 - TiDB-native vector-indexed retrieval;
 - full OCSI compliance;
-- full RDE scoring;
+- full T-RDE scoring;
 - production multi-user backend behavior.
 
 ## Promotion rule
@@ -458,20 +475,23 @@ A backend-specific feature should be promoted into OCSI only when:
 2. it can be described without vendor-specific syntax;
 3. it has testable behavior;
 4. it preserves backend independence;
-5. its Delta-M can be clearly explained.
+5. it strengthens T-RDE evidence preservation;
+6. its Delta-M can be clearly explained.
 
 ## RDE / Delta-M
 
 - Preserved: context remains portable, inspectable, and not bound to a single backend.
 - Transformed: Sayane Context Store thinking is generalized into an open interface concept.
-- Added: OCSI names, object model, capability model, backend families, and promotion rule.
+- Added: OCSI names, object model, capability model, backend families, T-RDE requirement, minimality principles, and promotion rule.
 - Unresolved: formal versioning, compliance test suite, and governance process.
 - Drift risk: OCSI may become too abstract unless anchored by concrete demo implementations such as Sayane-TiDB.
 
 ## Next steps
 
 1. Keep this document as the conceptual OCSI draft.
-2. Treat `connection-layer-spec.md` as a Sayane-oriented application profile of OCSI.
-3. Treat `sayane-tidb-basic-spec.md` as a TiDB adapter profile of OCSI.
-4. Add a minimal compliance checklist.
-5. Add an OCSI-to-Sayane mapping document if the concept is promoted to the main Sayane repository.
+2. Treat `ocsi-t-rde-requirement.md` as the implementation conformance constraint.
+3. Treat `ocsi-interface-minimality-principles.md` as the interface growth constraint.
+4. Treat `connection-layer-spec.md` as a Sayane-oriented application profile of OCSI.
+5. Treat `sayane-tidb-basic-spec.md` as a TiDB adapter profile of OCSI.
+6. Add a minimal compliance checklist.
+7. Add an OCSI-to-Sayane mapping document if the concept is promoted to the main Sayane repository.
