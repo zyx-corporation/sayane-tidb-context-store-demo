@@ -14,6 +14,8 @@ This is not the full Sayane implementation. It is a focused prototype for valida
 
 - [`docs/specs/open-context-store-interface.md`](docs/specs/open-context-store-interface.md): OCSI conceptual draft.
 - [`docs/specs/ocsi-t-rde-requirement.md`](docs/specs/ocsi-t-rde-requirement.md): T-RDE compatibility requirement for OCSI implementations.
+- [`docs/specs/ocsi-interface-minimality-principles.md`](docs/specs/ocsi-interface-minimality-principles.md): interface minimality principles.
+- [`docs/specs/ocsi-compliance-checklist.md`](docs/specs/ocsi-compliance-checklist.md): practical conformance checklist.
 - [`docs/specs/connection-layer-spec.md`](docs/specs/connection-layer-spec.md): Sayane-oriented connection layer profile.
 - [`docs/specs/sayane-tidb-basic-spec.md`](docs/specs/sayane-tidb-basic-spec.md): TiDB adapter basic specification.
 
