@@ -10,6 +10,7 @@ from sqlalchemy.engine import Engine
 
 from .chunker import chunk_markdown
 from .db import create_db_engine
+from .embeddings import EmbeddingProvider, create_embedding_provider
 
 
 @dataclass(frozen=True)
@@ -17,6 +18,7 @@ class IngestResult:
     document_id: str
     source_path: str
     chunk_count: int
+    embedded_count: int
 
 
 def document_id_for_path(path: Path) -> str:
@@ -37,8 +39,14 @@ def iter_markdown_files(path: Path) -> list[Path]:
     return [path]
 
 
-def ingest_markdown_path(path: Path, engine: Engine | None = None) -> list[IngestResult]:
+def ingest_markdown_path(
+    path: Path,
+    engine: Engine | None = None,
+    embed: bool = False,
+    embedding_provider: EmbeddingProvider | None = None,
+) -> list[IngestResult]:
     resolved_engine = engine or create_db_engine()
+    provider = embedding_provider or (create_embedding_provider() if embed else None)
     results: list[IngestResult] = []
 
     with resolved_engine.begin() as connection:
@@ -47,6 +55,7 @@ def ingest_markdown_path(path: Path, engine: Engine | None = None) -> list[Inges
             document_id = document_id_for_path(file)
             title = title_from_markdown(file, content)
             chunks = chunk_markdown(content)
+            embeddings = provider.embed_texts([chunk.content for chunk in chunks]) if provider else []
 
             connection.execute(
                 text(
@@ -60,8 +69,9 @@ def ingest_markdown_path(path: Path, engine: Engine | None = None) -> list[Inges
 
             connection.execute(text("DELETE FROM chunks WHERE document_id = :document_id"), {"document_id": document_id})
 
-            for chunk in chunks:
+            for index, chunk in enumerate(chunks):
                 chunk_id = f"{document_id}-{chunk.index}"
+                embedding = embeddings[index].embedding if embeddings else None
                 connection.execute(
                     text(
                         """
@@ -78,11 +88,18 @@ def ingest_markdown_path(path: Path, engine: Engine | None = None) -> list[Inges
                         "chunk_index": chunk.index,
                         "content": chunk.content,
                         "content_hash": chunk.content_hash,
-                        "embedding": None,
+                        "embedding": json.dumps(embedding) if embedding else None,
                         "metadata": json.dumps({"source_path": str(file)}, ensure_ascii=False),
                     },
                 )
 
-            results.append(IngestResult(document_id=document_id, source_path=str(file), chunk_count=len(chunks)))
+            results.append(
+                IngestResult(
+                    document_id=document_id,
+                    source_path=str(file),
+                    chunk_count=len(chunks),
+                    embedded_count=len(embeddings),
+                )
+            )
 
     return results
