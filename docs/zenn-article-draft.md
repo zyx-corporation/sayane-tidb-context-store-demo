@@ -1,4 +1,4 @@
-# RAGは検索して終わりではない：TiDB Cloudで作る監査可能なAIメモリ基盤
+# RAGは検索して終わりではない：TiDB Cloudで作る Sayane-linked な監査可能AIメモリ基盤
 
 ## はじめに
 
@@ -6,7 +6,7 @@ RAGを実装するとき、最初に目が向くのは検索精度です。し�
 
 どの文書を取り込んだのか。どのchunkが検索されたのか。どの検索モードで、どの結果が採用されたのか。その結果はあとから検査できるのか。
 
-このデモでは、Sayane Context Store Interface の検証用プロトタイプとして、TiDB Cloudをbackendにした最小のContext Storeを作ります。
+このデモでは、Sayane Context Store Interface の検証用プロトタイプとして、TiDB Cloudをbackendにした最小のContext Storeを作ります。これは単なるTiDBでのRAG実装ではなく、Sayaneの local-first context、candidate review、lineage、retrieval log、lightweight audit summary を enterprise Context Store backend へ接続できるかを確認する Sayane-linked な実証です。
 
 ## このデモで作るもの
 
@@ -20,6 +20,7 @@ RAGを実装するとき、最初に目が向くのは検索精度です。し�
 - vector search
 - hybrid search
 - retrieval logs
+- backend capability snapshot
 - lightweight RDE-style audit summary
 
 ただし、現時点のvector searchはTiDB native vector indexではありません。embeddingをTiDBにJSONとして保存し、Python側でcosine similarityを計算する中間実装です。
@@ -34,6 +35,7 @@ RAGを実装するとき、最初に目が向くのは検索精度です。し�
 - vector searchは意味的な近さに強い
 - hybrid searchは明示的なmerge policyが必要
 - retrieval logはdebug outputではなく、監査可能性の中核である
+- backend capability snapshotは検索結果の意味を後から読むための前提になる
 
 この段階で、検索方式の違いとretrieval logの価値を確認できます。
 
@@ -101,6 +103,7 @@ RAGでは、最終回答だけを見ると、どの文脈が使われたのか�
 - retrieved chunk IDs
 - scores
 - selected chunk IDs
+- backend capability snapshot
 - lightweight audit summary
 
 これにより、生成後に検索過程を確認できます。
@@ -127,4 +130,4 @@ RAGは検索して終わりではありません。
 
 AIエージェントのメモリ基盤では、検索結果を保存し、あとから検査できることが重要です。
 
-このデモは、TiDB Cloudをbackendに使いながら、Context Store、retrieval log、lightweight auditをひとつの小さなプロトタイプとして確認するものです。
+このデモは、TiDB Cloudをbackendに使いながら、Sayane-linked な Context Store、retrieval log、backend capability snapshot、lightweight auditをひとつの小さなプロトタイプとして確認するものです。
