@@ -2,17 +2,19 @@
 
 ## Current implementation level
 
-This repository currently implements a Level C prototype:
+This repository currently implements a Level C prototype approaching OCSI-Basic:
 
 - small working CLI;
+- backend capability reporting;
 - Markdown ingestion;
-- chunking;
+- chunking with recorded chunking strategy;
 - TiDB-backed document and chunk storage;
-- optional embedding generation;
+- source hash per document;
+- optional embedding generation with model/provider metadata;
 - text search;
 - JSON-embedding vector search evaluated in Python;
 - hybrid search result merging;
-- retrieval logs;
+- retrieval logs with backend capability snapshots;
 - lightweight RDE-style audit summary;
 - unit tests and CI.
 
@@ -36,6 +38,7 @@ This stage keeps the prototype reproducible and easy to inspect:
 ## Demo flow
 
 ```bash
+sayane-tidb-demo capabilities
 sayane-tidb-demo init
 sayane-tidb-demo ingest data/sample_docs
 sayane-tidb-demo search "TiDB" --mode text
@@ -45,6 +48,8 @@ sayane-tidb-demo search "Context Store Interface" --mode vector
 sayane-tidb-demo search "enterprise backend" --mode hybrid
 sayane-tidb-demo logs
 ```
+
+Retrieval logs now include a backend capability snapshot at retrieval time. This strengthens T-RDE evidence without claiming full T-RDE compliance.
 
 ## Article thesis
 

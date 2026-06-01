@@ -3,6 +3,7 @@ CREATE TABLE IF NOT EXISTS documents (
   title TEXT NOT NULL,
   source_path TEXT,
   source_type VARCHAR(32) NOT NULL DEFAULT 'markdown',
+  source_hash VARCHAR(128),
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -14,6 +15,9 @@ CREATE TABLE IF NOT EXISTS chunks (
   content TEXT NOT NULL,
   content_hash VARCHAR(128) NOT NULL,
   embedding JSON,
+  embedding_model TEXT,
+  embedding_provider TEXT,
+  chunking_strategy TEXT,
   metadata JSON,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -26,5 +30,6 @@ CREATE TABLE IF NOT EXISTS retrieval_logs (
   scores JSON,
   selected_chunk_ids JSON,
   audit_summary JSON,
+  backend_capabilities JSON,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

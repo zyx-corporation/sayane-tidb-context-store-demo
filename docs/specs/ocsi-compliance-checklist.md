@@ -193,22 +193,25 @@ Known satisfied areas:
 
 - [x] Stores document-like records.
 - [x] Stores chunk-like records.
+- [x] Preserves source hash per document.
+- [x] Records chunking strategy per SearchUnit.
+- [x] Records embedding model/provider per SearchUnit when embedded.
 - [x] Supports text search.
 - [x] Supports adapter-level vector search using JSON embeddings and Python cosine scoring.
 - [x] Supports adapter-level hybrid merge.
 - [x] Records retrieval logs.
+- [x] Stores backend capability snapshot per RetrievalEvent.
+- [x] Exposes backend capability metadata via CLI.
 - [x] Stores lightweight audit summaries.
 - [x] Has unit tests and CI for selected retrieval utilities.
 
 Known gaps:
 
-- [ ] Does not yet store source hash.
-- [ ] Does not yet record chunking strategy per SearchUnit.
-- [ ] Does not yet record embedding model per SearchUnit.
-- [ ] Does not yet record backend capability snapshot per RetrievalEvent.
 - [ ] Does not yet export evidence as a formal portable bundle.
 - [ ] Does not yet implement TiDB-native vector search.
 - [ ] Does not yet satisfy OCSI-T-RDE-Ready.
+- [ ] Does not yet record embedding generation timestamp or embedding hash.
+- [ ] Does not yet record fallback behavior or merge policy metadata in retrieval logs.
 
 ## Claim guidance
 

@@ -8,7 +8,8 @@ import json
 from sqlalchemy import text
 from sqlalchemy.engine import Engine
 
-from .chunker import chunk_markdown
+from .chunker import CHUNKING_STRATEGY, chunk_markdown
+from .config import load_settings
 from .db import create_db_engine
 from .embeddings import EmbeddingProvider, create_embedding_provider
 
@@ -23,6 +24,10 @@ class IngestResult:
 
 def document_id_for_path(path: Path) -> str:
     return hashlib.sha256(str(path).encode("utf-8")).hexdigest()[:32]
+
+
+def source_hash_for_content(content: str) -> str:
+    return hashlib.sha256(content.encode("utf-8")).hexdigest()
 
 
 def title_from_markdown(path: Path, content: str) -> str:
@@ -47,12 +52,14 @@ def ingest_markdown_path(
 ) -> list[IngestResult]:
     resolved_engine = engine or create_db_engine()
     provider = embedding_provider or (create_embedding_provider() if embed else None)
+    settings = load_settings() if embed else None
     results: list[IngestResult] = []
 
     with resolved_engine.begin() as connection:
         for file in iter_markdown_files(path):
             content = file.read_text(encoding="utf-8")
             document_id = document_id_for_path(file)
+            source_hash = source_hash_for_content(content)
             title = title_from_markdown(file, content)
             chunks = chunk_markdown(content)
             embeddings = provider.embed_texts([chunk.content for chunk in chunks]) if provider else []
@@ -60,11 +67,16 @@ def ingest_markdown_path(
             connection.execute(
                 text(
                     """
-                    REPLACE INTO documents (id, title, source_path, source_type)
-                    VALUES (:id, :title, :source_path, 'markdown')
+                    REPLACE INTO documents (id, title, source_path, source_type, source_hash)
+                    VALUES (:id, :title, :source_path, 'markdown', :source_hash)
                     """
                 ),
-                {"id": document_id, "title": title, "source_path": str(file)},
+                {
+                    "id": document_id,
+                    "title": title,
+                    "source_path": str(file),
+                    "source_hash": source_hash,
+                },
             )
 
             connection.execute(text("DELETE FROM chunks WHERE document_id = :document_id"), {"document_id": document_id})
@@ -76,9 +88,11 @@ def ingest_markdown_path(
                     text(
                         """
                         REPLACE INTO chunks (
-                          id, document_id, chunk_index, content, content_hash, embedding, metadata
+                          id, document_id, chunk_index, content, content_hash,
+                          embedding, embedding_model, embedding_provider, chunking_strategy, metadata
                         ) VALUES (
-                          :id, :document_id, :chunk_index, :content, :content_hash, :embedding, :metadata
+                          :id, :document_id, :chunk_index, :content, :content_hash,
+                          :embedding, :embedding_model, :embedding_provider, :chunking_strategy, :metadata
                         )
                         """
                     ),
@@ -89,6 +103,9 @@ def ingest_markdown_path(
                         "content": chunk.content,
                         "content_hash": chunk.content_hash,
                         "embedding": json.dumps(embedding) if embedding else None,
+                        "embedding_model": settings.embedding_model if embed else None,
+                        "embedding_provider": "openai" if embed else None,
+                        "chunking_strategy": CHUNKING_STRATEGY,
                         "metadata": json.dumps({"source_path": str(file)}, ensure_ascii=False),
                     },
                 )

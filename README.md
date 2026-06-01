@@ -54,6 +54,7 @@ See [`docs/zenn-article-draft.md`](docs/zenn-article-draft.md) for the initial a
 ## Planned CLI
 
 ```bash
+sayane-tidb-demo capabilities
 sayane-tidb-demo init
 sayane-tidb-demo ingest data/sample_docs
 sayane-tidb-demo ingest data/sample_docs --embed

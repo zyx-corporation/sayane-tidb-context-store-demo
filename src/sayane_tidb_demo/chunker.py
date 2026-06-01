@@ -3,6 +3,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 import hashlib
 
+CHUNKING_STRATEGY = "paragraph-boundary-max-chars-1200"
+
 
 @dataclass(frozen=True)
 class Chunk:

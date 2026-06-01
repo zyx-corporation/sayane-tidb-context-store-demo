@@ -61,6 +61,7 @@ id VARCHAR(64) PRIMARY KEY
 title TEXT
 source_path TEXT
 source_type VARCHAR(32)
+source_hash VARCHAR(128)
 created_at TIMESTAMP
 updated_at TIMESTAMP
 ```
@@ -78,6 +79,9 @@ chunk_index INT
 content TEXT
 content_hash VARCHAR(128)
 embedding JSON
+embedding_model TEXT
+embedding_provider TEXT
+chunking_strategy TEXT
 metadata JSON
 created_at TIMESTAMP
 ```
@@ -96,10 +100,19 @@ retrieved_chunk_ids JSON
 scores JSON
 selected_chunk_ids JSON
 audit_summary JSON
+backend_capabilities JSON
 created_at TIMESTAMP
 ```
 
 ## Supported operations
+
+### show backend capabilities
+
+Reports backend capability metadata without requiring TiDB or OpenAI credentials.
+
+```bash
+sayane-tidb-demo capabilities
+```
 
 ### initialize schema
 
@@ -221,17 +234,32 @@ TiDB is especially useful as a demo target because it is SQL-first, MySQL-compat
 
 ## Capability declaration
 
-Current capabilities:
+Current capabilities are exposed via:
+
+```bash
+sayane-tidb-demo capabilities
+```
+
+Current values:
 
 ```text
-supports_text_search: true
+backend_id: sayane-tidb-json-vector-demo
+supports_lexical_search: true
 supports_vector_search: true
 supports_hybrid_search: true
 supports_native_vector_index: false
-supports_sql_audit_tables: true
+supports_full_text_index: false
+supports_sql_queries: true
 supports_transactional_ingest: true
+supports_audit_log_tables: true
 supports_portable_export: false
+supports_multi_user_access: false
+supports_cloud_managed_operations: true
+supports_local_first_storage: false
+supports_event_lineage: true
 ```
+
+Retrieval logs store a backend capability snapshot at retrieval time.
 
 ## RDE boundary
 

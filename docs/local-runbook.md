@@ -6,13 +6,14 @@ This runbook describes how to run the Sayane TiDB Context Store Demo locally.
 
 The current implementation supports:
 
+- backend capability reporting;
 - schema initialization;
 - Markdown ingestion;
 - optional embedding generation;
 - text search;
 - JSON-embedding vector search evaluated in Python;
 - hybrid search;
-- retrieval log inspection.
+- retrieval log inspection with backend capability snapshots.
 
 ## 1. Install
 
@@ -55,7 +56,15 @@ EMBEDDING_MODEL=text-embedding-3-small
 EMBEDDING_DIM=1536
 ```
 
-## 3. Initialize schema
+## 3. Inspect backend capabilities
+
+This command does not require TiDB or OpenAI credentials.
+
+```bash
+sayane-tidb-demo capabilities
+```
+
+## 4. Initialize schema
 
 ```bash
 sayane-tidb-demo init
@@ -65,7 +74,7 @@ make init
 
 This command executes SQL files under `sql/`.
 
-## 4. Ingest without embeddings
+## 5. Ingest without embeddings
 
 ```bash
 sayane-tidb-demo ingest data/sample_docs
@@ -81,7 +90,7 @@ sayane-tidb-demo search "TiDB" --mode text
 make search-text
 ```
 
-## 5. Ingest with embeddings
+## 6. Ingest with embeddings
 
 ```bash
 sayane-tidb-demo ingest data/sample_docs --embed
@@ -101,7 +110,7 @@ make search-vector
 make search-hybrid
 ```
 
-## 6. Inspect retrieval logs
+## 7. Inspect retrieval logs
 
 ```bash
 sayane-tidb-demo logs
@@ -121,6 +130,7 @@ It is not yet TiDB-native vector-indexed search. See `docs/article-implementatio
 For the Zenn article, the simplest reproducible flow is:
 
 ```bash
+sayane-tidb-demo capabilities
 make init
 make ingest
 make search-text

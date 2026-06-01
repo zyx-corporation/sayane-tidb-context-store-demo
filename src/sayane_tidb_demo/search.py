@@ -9,6 +9,7 @@ from sqlalchemy import text
 from sqlalchemy.engine import Engine
 
 from .audit import lightweight_audit
+from .capabilities import get_backend_capabilities
 from .db import create_db_engine
 from .embeddings import EmbeddingProvider, create_embedding_provider
 
@@ -185,6 +186,7 @@ def run_search(query: str, mode: str = "text", engine: Engine | None = None, lim
 
     selected_chunks = [{"id": result.chunk_id, "content": result.content} for result in results]
     audit_summary = lightweight_audit(query, selected_chunks)
+    backend_capabilities = get_backend_capabilities().to_dict()
     retrieval_id = str(uuid.uuid4())
 
     with resolved_engine.begin() as connection:
@@ -192,9 +194,11 @@ def run_search(query: str, mode: str = "text", engine: Engine | None = None, lim
             text(
                 """
                 INSERT INTO retrieval_logs (
-                  id, query, mode, retrieved_chunk_ids, scores, selected_chunk_ids, audit_summary
+                  id, query, mode, retrieved_chunk_ids, scores, selected_chunk_ids,
+                  audit_summary, backend_capabilities
                 ) VALUES (
-                  :id, :query, :mode, :retrieved_chunk_ids, :scores, :selected_chunk_ids, :audit_summary
+                  :id, :query, :mode, :retrieved_chunk_ids, :scores, :selected_chunk_ids,
+                  :audit_summary, :backend_capabilities
                 )
                 """
             ),
@@ -206,6 +210,7 @@ def run_search(query: str, mode: str = "text", engine: Engine | None = None, lim
                 "scores": json.dumps({result.chunk_id: result.score for result in results}),
                 "selected_chunk_ids": json.dumps([result.chunk_id for result in results]),
                 "audit_summary": json.dumps(audit_summary, ensure_ascii=False),
+                "backend_capabilities": json.dumps(backend_capabilities, ensure_ascii=False),
             },
         )
 
@@ -224,7 +229,7 @@ def list_retrieval_logs(engine: Engine | None = None, limit: int = 20) -> list[d
         rows = connection.execute(
             text(
                 """
-                SELECT id, query, mode, retrieved_chunk_ids, audit_summary, created_at
+                SELECT id, query, mode, retrieved_chunk_ids, audit_summary, backend_capabilities, created_at
                 FROM retrieval_logs
                 ORDER BY created_at DESC
                 LIMIT :limit
@@ -241,7 +246,8 @@ def get_retrieval_log(retrieval_id: str, engine: Engine | None = None) -> dict[s
         row = connection.execute(
             text(
                 """
-                SELECT id, query, mode, retrieved_chunk_ids, scores, selected_chunk_ids, audit_summary, created_at
+                SELECT id, query, mode, retrieved_chunk_ids, scores, selected_chunk_ids,
+                       audit_summary, backend_capabilities, created_at
                 FROM retrieval_logs
                 WHERE id = :id
                 """
